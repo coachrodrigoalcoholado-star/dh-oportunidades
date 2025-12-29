@@ -51,7 +51,7 @@ export default function LoginPage() {
         setErrorMsg('');
 
         try {
-            const { error, data } = await signInWithPassword(email, password);
+            const { error, data } = await signInWithPassword(email, password) as any;
             if (error) {
                 setStatus('error');
                 setErrorMsg(error.message || "Credenciales inválidas. Intenta nuevamente.");
