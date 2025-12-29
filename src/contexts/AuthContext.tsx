@@ -8,7 +8,7 @@ import { User } from '@supabase/supabase-js';
 type AuthContextType = {
     user: User | null;
     isLoading: boolean;
-    signInWithPassword: (email: string, password: string) => Promise<{ error: any }>;
+    signInWithPassword: (email: string, password: string) => Promise<{ data: any; error: any }>;
     signOut: () => Promise<void>;
 };
 
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [supabase, router]);
 
     const signInWithPassword = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             router.refresh();
         }
 
-        return { error };
+        return { data, error };
     };
 
     const signOut = async () => {
