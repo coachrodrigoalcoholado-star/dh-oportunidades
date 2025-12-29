@@ -1,0 +1,1 @@
+https://btasixrpjniqqwiyzllv.supabase.co/auth/v1/verify?token=3a806c9d10e882e0dd1bc6fc838b16eb149c87e74220300b63878687&type=magiclink&redirect_to=http://localhost:3001/login
