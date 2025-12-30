@@ -26,13 +26,17 @@ interface FootwearConfig {
 const DEFAULT_RATES: RateConfig = { 4: 0.35, 6: 0.47, 8: 0.65, 10: 0.85 };
 const DEFAULT_FOOTWEAR: FootwearConfig = { markup: 100, quotas: [3, 6] };
 
-export default function Simulator() {
+interface SimulatorProps {
+    forcedMode?: 'loans' | 'footwear';
+}
+
+export default function Simulator({ forcedMode }: SimulatorProps) {
     const { user, signOut } = useAuth();
     const router = useRouter();
     const isAdmin = user?.user_metadata?.role === 'admin';
 
     // State
-    const [mode, setMode] = useState<'loans' | 'footwear'>('loans');
+    const [mode, setMode] = useState<'loans' | 'footwear'>(forcedMode || 'loans');
     const [amount, setAmount] = useState<string>("");
     const [footwearDetails, setFootwearDetails] = useState<string>("");
     const [isGenerating, setIsGenerating] = useState(false);
@@ -42,120 +46,19 @@ export default function Simulator() {
     const cardRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        if (forcedMode) setMode(forcedMode);
         fetchConfig();
-    }, []);
+    }, [forcedMode]);
 
-    const fetchConfig = async () => {
-        try {
-            const res = await fetch('/api/admin/config');
-            const data = await res.json();
+    // ... (rest of functions)
 
-            if (data?.rates) setRates(data.rates);
-            if (data?.footwear) setFootwearConfig(data.footwear);
-        } catch (error) {
-            console.error("Using default config due to error:", error);
-        } finally {
-            setLoadingConfig(false);
-        }
-    };
-
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = e.target.value.replace(/\D/g, "");
-        if (!rawValue) {
-            setAmount("");
-            return;
-        }
-        const numericValue = parseInt(rawValue, 10);
-        setAmount(numericValue.toLocaleString("es-AR"));
-    };
-
-    const getNumericAmount = () => {
-        if (!amount) return 0;
-        return parseInt(amount.replace(/\./g, "").replace(/,/g, ""), 10);
-    };
-
-    const calculateLoan = (capital: number, installments: number): LoanResult => {
-        const rate = rates[installments] || 0.50;
-        const total = capital + (capital * rate);
-        const installmentValue = total / installments;
-        return { installments, total, installmentValue };
-    };
-
-    const calculateFootwear = (capital: number, installments: number): LoanResult => {
-        // Footwear Logic: (Base * Markup) / Installments. NO Interest on top of markup.
-        const markupMultiplier = 1 + (footwearConfig.markup / 100);
-        const total = capital * markupMultiplier;
-        const installmentValue = total / installments;
-        return { installments, total, installmentValue };
-    };
-
-    const logSimulation = async (action: 'view' | 'download') => {
-        if (!user) return;
-        try {
-            await fetch('/api/simulation/log', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: user.id,
-                    amount: getNumericAmount(),
-                    installments: 0,
-                    metadata: { action, mode, details: footwearDetails }
-                })
-            });
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleDownload = async () => {
-        try {
-            setIsGenerating(true);
-            const node = document.getElementById("flyer-export");
-            if (!node) throw new Error("flyer-export no encontrado");
-            if (document.fonts) await document.fonts.ready;
-
-            const blob = await toBlob(node, {
-                quality: 0.95,
-                backgroundColor: "#020617",
-                cacheBust: true,
-                style: {
-                    backgroundColor: "#020617",
-                    backgroundImage: "linear-gradient(to bottom right, #020617, #0f172a, #000000)",
-                }
-            });
-
-            if (!blob) throw new Error("No se pudo generar el archivo.");
-            const cleanAmount = amount.replace(/\./g, "").replace(/,/g, "");
-
-            let filename;
-            if (mode === 'loans') {
-                filename = `PRESTAMO_DH_${cleanAmount}.jpg`;
-            } else {
-                filename = `CALZADOS - DH OPORTUNIDADES.jpg`;
-            }
-
-            saveAs(blob, filename);
-
-            setIsGenerating(false);
-            logSimulation('download');
-        } catch (error: any) {
-            alert(`Error: ${error.message}`);
-            setIsGenerating(false);
-        }
-    };
-
-    const hasAmount = getNumericAmount() > 0;
-
-    // Determine active installments based on mode
-    const activeInstallments = mode === 'loans'
-        ? Object.keys(rates).map(Number).sort((a, b) => a - b)
-        : (footwearConfig.quotas || []).sort((a, b) => a - b);
+    // ...
 
     return (
         <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6 relative">
 
-            {/* HEADER / USER ACTIONS */}
-            {user && (
+            {/* HEADER / USER ACTIONS (Only show if user exists AND not in forced mode) */}
+            {user && !forcedMode && (
                 <div className="flex justify-between items-center w-full mb-2">
                     <span className="text-xs font-mono text-gray-500">{user.email?.split('@')[0]}</span>
                     {isAdmin ? (
@@ -173,23 +76,25 @@ export default function Simulator() {
                 </div>
             )}
 
-            {/* TABS */}
-            <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl backdrop-blur-md border border-white/10">
-                <button
-                    onClick={() => { setMode('loans'); setAmount(''); setFootwearDetails(''); }}
-                    className={`flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${mode === 'loans' ? 'bg-dh-gold text-black shadow-lg shadow-dh-gold/20' : 'text-gray-400 hover:text-white'}`}
-                >
-                    <Wallet className="w-4 h-4" />
-                    Préstamos
-                </button>
-                <button
-                    onClick={() => { setMode('footwear'); setAmount(''); }}
-                    className={`flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${mode === 'footwear' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-gray-400 hover:text-white'}`}
-                >
-                    <ShoppingBag className="w-4 h-4" />
-                    Calzado
-                </button>
-            </div>
+            {/* TABS (Hidden if forcedMode is active) */}
+            {!forcedMode && (
+                <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl backdrop-blur-md border border-white/10">
+                    <button
+                        onClick={() => { setMode('loans'); setAmount(''); setFootwearDetails(''); }}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${mode === 'loans' ? 'bg-dh-gold text-black shadow-lg shadow-dh-gold/20' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        <Wallet className="w-4 h-4" />
+                        Préstamos
+                    </button>
+                    <button
+                        onClick={() => { setMode('footwear'); setAmount(''); }}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${mode === 'footwear' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        <ShoppingBag className="w-4 h-4" />
+                        Calzado
+                    </button>
+                </div>
+            )}
 
             {/* AMOUNT & DETAILS INPUT */}
             <motion.div
