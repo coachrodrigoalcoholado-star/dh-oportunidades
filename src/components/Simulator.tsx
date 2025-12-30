@@ -160,7 +160,7 @@ export default function Simulator() {
                     <span className="text-xs font-mono text-gray-500">{user.email?.split('@')[0]}</span>
                     {isAdmin ? (
                         <button onClick={() => router.push('/admin')} className="action-btn">
-                            <LayoutDashboard className="w-3 h-3" /> Panel
+                            <LayoutDashboard className="w-3 h-3" /> Panel Principal
                         </button>
                     ) : (
                         <button onClick={() => signOut()} className="action-btn-red">
