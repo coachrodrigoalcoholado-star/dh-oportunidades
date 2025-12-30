@@ -133,7 +133,7 @@ export default function ConfigPage() {
 
             {/* FOOTWEAR CONFIG */}
             <section className="bg-dh-gray/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                     <ShoppingBag className="w-32 h-32 text-indigo-400" />
                 </div>
 
