@@ -116,11 +116,13 @@ export default function AdminDashboard() {
                                     alert("✅ Historial reseteado correctamente.");
                                     window.location.reload();
                                 } else {
-                                    alert("❌ Error al resetear.");
+                                    // Try to get error message
+                                    const errData = await res.json().catch(() => ({}));
+                                    alert(`❌ Error al resetear: ${errData.error || res.statusText}`);
                                 }
-                            } catch (e) {
+                            } catch (e: any) {
                                 console.error(e);
-                                alert("❌ Error de conexión.");
+                                alert(`❌ Error de conexión: ${e.message}`);
                             }
                         }}
                         className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-xs font-bold transition-all border border-red-500/20 mx-auto"
