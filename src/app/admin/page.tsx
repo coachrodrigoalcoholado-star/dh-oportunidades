@@ -48,7 +48,7 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-3xl font-black text-white tracking-tight">Dashboard</h2>
+                <h2 className="text-3xl font-black text-white tracking-tight">Dashboard <span className="text-xs bg-dh-gold text-black px-2 py-1 rounded ml-2">v1.2</span></h2>
                 <p className="text-gray-400 mt-1">Resumen de actividad en tiempo real.</p>
             </div>
 
