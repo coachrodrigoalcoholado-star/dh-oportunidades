@@ -164,15 +164,15 @@ export default function ConfigPage() {
                     <div>
                         <label className="block text-gray-400 text-sm font-bold mb-2 uppercase tracking-wider">Cuotas Habilitadas</label>
                         <div className="flex flex-wrap gap-2">
-                            {[1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24].map((q) => {
+                            {Array.from({ length: 24 }, (_, i) => i + 1).map((q) => {
                                 const isActive = footwearConfig.quotas?.includes(q);
                                 return (
                                     <button
                                         key={q}
                                         onClick={() => toggleFootwearQuota(q)}
                                         className={`w-10 h-10 rounded-lg font-bold text-sm transition-all border ${isActive
-                                                ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                                                : 'bg-black/20 border-white/5 text-gray-500 hover:border-indigo-500/50 hover:text-indigo-400'
+                                            ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                                            : 'bg-black/20 border-white/5 text-gray-500 hover:border-indigo-500/50 hover:text-indigo-400'
                                             }`}
                                     >
                                         {q}
