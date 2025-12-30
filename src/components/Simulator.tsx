@@ -159,8 +159,11 @@ export default function Simulator() {
                 <div className="flex justify-between items-center w-full mb-2">
                     <span className="text-xs font-mono text-gray-500">{user.email?.split('@')[0]}</span>
                     {isAdmin ? (
-                        <button onClick={() => router.push('/admin')} className="action-btn">
-                            <LayoutDashboard className="w-3 h-3" /> Panel Principal
+                        <button
+                            onClick={() => router.push('/admin')}
+                            className="flex items-center gap-2 bg-dh-gold hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-lg shadow-dh-gold/20"
+                        >
+                            <LayoutDashboard className="w-4 h-4" /> Panel Principal
                         </button>
                     ) : (
                         <button onClick={() => signOut()} className="action-btn-red">
