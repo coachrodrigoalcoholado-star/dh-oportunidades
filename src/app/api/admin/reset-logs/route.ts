@@ -11,7 +11,7 @@ export async function GET() {
         const { error } = await supabase
             .from('simulations_log')
             .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete ALL rows securely
+            .gt('id', 0); // Delete ALL rows (IDs are positive integers)
 
         if (error) throw error;
 
