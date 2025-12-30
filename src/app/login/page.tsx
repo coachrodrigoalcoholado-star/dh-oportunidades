@@ -141,12 +141,6 @@ export default function LoginPage() {
                         ← Volver al Simulador (Público)
                     </Link>
                 </div>
-
-                <div className="mt-4 p-4 bg-black/50 text-[10px] text-gray-500 font-mono break-all">
-                    <p>DEBUG INFO:</p>
-                    <p>URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? 'OK (' + process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 10) + '...)' : 'MISSING'}</p>
-                    <p>KEY: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'OK (' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 5) + '...)' : 'MISSING'}</p>
-                </div>
             </div>
         </main>
     );
