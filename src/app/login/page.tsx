@@ -39,7 +39,7 @@ export default function LoginPage() {
 
     // If already logged in, redirect
     if (user) {
-        const dest = user.user_metadata?.role === 'admin' ? '/admin' : '/';
+        const dest = user.user_metadata?.role === 'admin' ? '/admin' : '/simulador';
         // Avoid infinite loop if we are already on the target page (unlikely in login page but good practice)
         // Router push is safe here
         router.push(dest);
@@ -62,7 +62,7 @@ export default function LoginPage() {
                 setStatus('success');
                 // Check role to decide destination
                 const role = data?.user?.user_metadata?.role;
-                const destination = role === 'admin' ? '/admin' : '/';
+                const destination = role === 'admin' ? '/admin' : '/simulador';
 
                 // Force hard navigation to ensure cookies are fresh for middleware
                 window.location.href = destination;

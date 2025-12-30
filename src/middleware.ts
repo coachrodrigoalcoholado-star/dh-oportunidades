@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
     // 2. If accessing protected routes (admin or root) while NOT authenticated, redirect to login
     // We protect everything except public assets, api (some might be public), and login
     const isPublic = req.nextUrl.pathname === '/login' ||
-        req.nextUrl.pathname === '/' || // Allow public access to home/simulator
+        // req.nextUrl.pathname === '/' || // Root is now PRIVATE
         req.nextUrl.pathname.startsWith('/_next') ||
         req.nextUrl.pathname.startsWith('/api') ||
         req.nextUrl.pathname.includes('.'); // files like favicon.ico, images
