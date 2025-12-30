@@ -50,9 +50,112 @@ export default function Simulator({ forcedMode }: SimulatorProps) {
         fetchConfig();
     }, [forcedMode]);
 
-    // ... (rest of functions)
+    const fetchConfig = async () => {
+        try {
+            const res = await fetch('/api/admin/config');
+            const data = await res.json();
 
-    // ...
+            if (data?.rates) setRates(data.rates);
+            if (data?.footwear) setFootwearConfig(data.footwear);
+        } catch (error) {
+            console.error("Using default config due to error:", error);
+        } finally {
+            setLoadingConfig(false);
+        }
+    };
+
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = e.target.value.replace(/\D/g, "");
+        if (!rawValue) {
+            setAmount("");
+            return;
+        }
+        const numericValue = parseInt(rawValue, 10);
+        setAmount(numericValue.toLocaleString("es-AR"));
+    };
+
+    const getNumericAmount = () => {
+        if (!amount) return 0;
+        return parseInt(amount.replace(/\./g, "").replace(/,/g, ""), 10);
+    };
+
+    const calculateLoan = (capital: number, installments: number): LoanResult => {
+        const rate = rates[installments] || 0.50;
+        const total = capital + (capital * rate);
+        const installmentValue = total / installments;
+        return { installments, total, installmentValue };
+    };
+
+    const calculateFootwear = (capital: number, installments: number): LoanResult => {
+        // Footwear Logic: (Base * Markup) / Installments. NO Interest on top of markup.
+        const markupMultiplier = 1 + (footwearConfig.markup / 100);
+        const total = capital * markupMultiplier;
+        const installmentValue = total / installments;
+        return { installments, total, installmentValue };
+    };
+
+    const logSimulation = async (action: 'view' | 'download') => {
+        // Only log if user is logged in (public mode doesn't log)
+        if (!user) return;
+        try {
+            await fetch('/api/simulation/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.id,
+                    amount: getNumericAmount(),
+                    installments: 0,
+                    metadata: { action, mode, details: footwearDetails }
+                })
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleDownload = async () => {
+        try {
+            setIsGenerating(true);
+            const node = document.getElementById("flyer-export");
+            if (!node) throw new Error("flyer-export no encontrado");
+            if (document.fonts) await document.fonts.ready;
+
+            const blob = await toBlob(node, {
+                quality: 0.95,
+                backgroundColor: "#020617",
+                cacheBust: true,
+                style: {
+                    backgroundColor: "#020617",
+                    backgroundImage: "linear-gradient(to bottom right, #020617, #0f172a, #000000)",
+                }
+            });
+
+            if (!blob) throw new Error("No se pudo generar el archivo.");
+            const cleanAmount = amount.replace(/\./g, "").replace(/,/g, "");
+
+            let filename;
+            if (mode === 'loans') {
+                filename = `PRESTAMO_DH_${cleanAmount}.jpg`;
+            } else {
+                filename = `CALZADOS - DH OPORTUNIDADES.jpg`;
+            }
+
+            saveAs(blob, filename);
+
+            setIsGenerating(false);
+            logSimulation('download');
+        } catch (error: any) {
+            alert(`Error: ${error.message}`);
+            setIsGenerating(false);
+        }
+    };
+
+    const hasAmount = getNumericAmount() > 0;
+
+    // Determine active installments based on mode
+    const activeInstallments = mode === 'loans'
+        ? Object.keys(rates).map(Number).sort((a, b) => a - b)
+        : (footwearConfig.quotas || []).sort((a, b) => a - b);
 
     return (
         <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6 relative">
