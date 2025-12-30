@@ -28,7 +28,14 @@ export default function RootLayout({
         className={`${montserrat.variable} antialiased bg-dh-dark text-white`}
       >
         <AuthProvider>
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <main className="flex-grow">
+              {children}
+            </main>
+            <footer className="py-6 text-center text-[10px] text-gray-700 font-mono tracking-[0.2em] uppercase opacity-40 hover:opacity-100 transition-opacity select-none cursor-default">
+              Powered by Rodrigo Alcoholado
+            </footer>
+          </div>
         </AuthProvider>
       </body>
     </html>
