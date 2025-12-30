@@ -34,6 +34,7 @@ export default function Simulator() {
     // State
     const [mode, setMode] = useState<'loans' | 'footwear'>('loans');
     const [amount, setAmount] = useState<string>("");
+    const [footwearDetails, setFootwearDetails] = useState<string>("");
     const [isGenerating, setIsGenerating] = useState(false);
     const [rates, setRates] = useState<RateConfig>(DEFAULT_RATES);
     const [footwearConfig, setFootwearConfig] = useState<FootwearConfig>(DEFAULT_FOOTWEAR);
@@ -98,7 +99,7 @@ export default function Simulator() {
                     userId: user.id,
                     amount: getNumericAmount(),
                     installments: 0,
-                    metadata: { action, mode }
+                    metadata: { action, mode, details: footwearDetails }
                 })
             });
         } catch (e) {
@@ -165,7 +166,7 @@ export default function Simulator() {
             {/* TABS */}
             <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl backdrop-blur-md border border-white/10">
                 <button
-                    onClick={() => { setMode('loans'); setAmount(''); }}
+                    onClick={() => { setMode('loans'); setAmount(''); setFootwearDetails(''); }}
                     className={`flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${mode === 'loans' ? 'bg-dh-gold text-black shadow-lg shadow-dh-gold/20' : 'text-gray-400 hover:text-white'}`}
                 >
                     <Wallet className="w-4 h-4" />
@@ -180,29 +181,51 @@ export default function Simulator() {
                 </button>
             </div>
 
-            {/* AMOUNT INPUT */}
+            {/* AMOUNT & DETAILS INPUT */}
             <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="bg-dh-gray/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl"
+                className="bg-dh-gray/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl space-y-4"
             >
-                <div className="flex justify-between items-center mb-2">
-                    <label className="text-gray-400 text-sm font-uppercase tracking-wider">
-                        {mode === 'loans' ? 'Monto a Solicitar' : 'Precio del Calzado'}
-                    </label>
-                    {loadingConfig && <span className="text-xs text-dh-gold animate-pulse">Sync...</span>}
+                {/* Amount Field */}
+                <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <label className="text-gray-400 text-sm font-uppercase tracking-wider">
+                            {mode === 'loans' ? 'Monto a Solicitar' : 'Precio del Calzado'}
+                        </label>
+                        {loadingConfig && <span className="text-xs text-dh-gold animate-pulse">Sync...</span>}
+                    </div>
+                    <div className="relative">
+                        <DollarSign className={`absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 ${mode === 'loans' ? 'text-dh-gold' : 'text-indigo-500'}`} />
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            value={amount}
+                            onChange={handleAmountChange}
+                            placeholder="0"
+                            className={`w-full bg-transparent border-b-2 focus:border-opacity-100 border-white/10 text-3xl sm:text-4xl font-bold text-white pl-10 py-4 outline-none transition-colors placeholder:text-gray-700 ${mode === 'loans' ? 'focus:border-dh-gold' : 'focus:border-indigo-500'}`}
+                        />
+                    </div>
                 </div>
-                <div className="relative mt-2">
-                    <DollarSign className={`absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 ${mode === 'loans' ? 'text-dh-gold' : 'text-indigo-500'}`} />
-                    <input
-                        type="text"
-                        inputMode="numeric"
-                        value={amount}
-                        onChange={handleAmountChange}
-                        placeholder="0"
-                        className={`w-full bg-transparent border-b-2 focus:border-opacity-100 border-white/10 text-3xl sm:text-4xl font-bold text-white pl-10 py-4 outline-none transition-colors placeholder:text-gray-700 ${mode === 'loans' ? 'focus:border-dh-gold' : 'focus:border-indigo-500'}`}
-                    />
-                </div>
+
+                {/* Footwear Details Field */}
+                {mode === 'footwear' && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="pt-2"
+                    >
+                        <label className="text-gray-400 text-sm font-uppercase tracking-wider mb-2 block">Detalle (Modelo/Talle)</label>
+                        <input
+                            type="text"
+                            value={footwearDetails}
+                            onChange={(e) => setFootwearDetails(e.target.value)}
+                            placeholder="Ej: NIKE AIR - 42 - BLANCA"
+                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-indigo-500 outline-none text-sm placeholder:text-gray-600"
+                            maxLength={40}
+                        />
+                    </motion.div>
+                )}
             </motion.div>
 
             {/* FLYER PREVIEW */}
@@ -238,14 +261,18 @@ export default function Simulator() {
                                 {/* Header Info */}
                                 <div className="text-center mb-6 relative z-10">
                                     <p style={{ color: "#9ca3af", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em" }}>
-                                        {mode === 'loans' ? 'Capital Solicitado' : 'Total Financiado'}
+                                        {mode === 'loans' ? 'Capital Solicitado' : 'CALZADO'}
                                     </p>
-                                    <p className="font-mono mt-1" style={{ fontSize: "2rem", fontWeight: "bold", color: "#ffffff" }}>
-                                        ${mode === 'loans'
-                                            ? getNumericAmount().toLocaleString('es-AR')
-                                            : (getNumericAmount() * (1 + footwearConfig.markup / 100)).toLocaleString('es-AR')
-                                        }
-                                    </p>
+
+                                    {mode === 'loans' ? (
+                                        <p className="font-mono mt-1" style={{ fontSize: "2rem", fontWeight: "bold", color: "#ffffff" }}>
+                                            ${getNumericAmount().toLocaleString('es-AR')}
+                                        </p>
+                                    ) : (
+                                        <p className="font-bold mt-1 tracking-wide uppercase" style={{ fontSize: "1.5rem", color: "#ffffff", lineHeight: "1.2" }}>
+                                            {footwearDetails || '---'}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Installments List */}
@@ -297,8 +324,8 @@ export default function Simulator() {
                             onClick={handleDownload}
                             disabled={isGenerating}
                             className={`w-full font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ${mode === 'loans'
-                                    ? 'bg-gradient-to-r from-dh-gold to-yellow-600 text-black shadow-dh-gold/20'
-                                    : 'bg-gradient-to-r from-indigo-500 to-indigo-700 text-white shadow-indigo-500/20'
+                                ? 'bg-gradient-to-r from-dh-gold to-yellow-600 text-black shadow-dh-gold/20'
+                                : 'bg-gradient-to-r from-indigo-500 to-indigo-700 text-white shadow-indigo-500/20'
                                 } ${isGenerating ? 'opacity-80' : ''}`}
                         >
                             <Download className={`w-5 h-5 ${isGenerating ? 'animate-bounce' : ''}`} />
