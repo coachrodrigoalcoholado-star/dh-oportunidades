@@ -70,7 +70,13 @@ export default function Simulator({ forcedMode }: SimulatorProps) {
             setAmount("");
             return;
         }
-        const numericValue = parseInt(rawValue, 10);
+        let numericValue = parseInt(rawValue, 10);
+
+        // Limit to $2.000.000 only for Loans
+        if (mode === 'loans' && numericValue > 2000000) {
+            numericValue = 2000000;
+        }
+
         setAmount(numericValue.toLocaleString("es-AR"));
     };
 
