@@ -16,21 +16,21 @@ export async function GET() {
             }
         );
 
+        // Fetch both configs
         const { data, error } = await supabase
             .from('app_config')
-            .select('value')
-            .eq('key', 'rates_config')
-            .single();
+            .select('key, value')
+            .in('key', ['rates_config', 'footwear_config']);
 
-        if (error) {
-            // If not found, return null (client handles defaults)
-            if (error.code === 'PGRST116') {
-                return NextResponse.json({ value: null });
-            }
-            throw error;
-        }
+        if (error) throw error;
 
-        return NextResponse.json(data);
+        // Transform to easy object
+        const config = {
+            rates: data?.find(d => d.key === 'rates_config')?.value || null,
+            footwear: data?.find(d => d.key === 'footwear_config')?.value || null
+        };
+
+        return NextResponse.json(config);
 
     } catch (error: any) {
         console.error('Config Fetch Error:', error);
@@ -41,11 +41,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { rates } = body;
-
-        if (!rates) {
-            return NextResponse.json({ error: 'Missing rates data' }, { status: 400 });
-        }
+        const { rates, footwear } = body;
 
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -58,16 +54,19 @@ export async function POST(req: Request) {
             }
         );
 
-        const { error } = await supabase
-            .from('app_config')
-            .upsert({
-                key: 'rates_config',
-                value: rates
-            }, {
-                onConflict: 'key'
-            });
+        const updates = [];
 
-        if (error) throw error;
+        if (rates) {
+            updates.push(supabase.from('app_config').upsert({ key: 'rates_config', value: rates }, { onConflict: 'key' }));
+        }
+
+        if (footwear) {
+            updates.push(supabase.from('app_config').upsert({ key: 'footwear_config', value: footwear }, { onConflict: 'key' }));
+        }
+
+        if (updates.length > 0) {
+            await Promise.all(updates);
+        }
 
         return NextResponse.json({ success: true });
 
