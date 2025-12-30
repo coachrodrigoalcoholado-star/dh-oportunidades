@@ -102,9 +102,31 @@ export default function AdminDashboard() {
                 <div className="bg-gradient-to-br from-dh-gold/10 to-transparent rounded-2xl border border-dh-gold/20 p-8 flex flex-col justify-center text-center">
                     <Activity className="w-12 h-12 text-dh-gold mx-auto mb-4" />
                     <h3 className="text-lg font-bold text-white mb-2">Monitor de Actividad</h3>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-400 mb-6">
                         Cada vez que un asesor (conectado) descarga un flyer, se registra automáticamente aquí. Las simulaciones públicas no anónimas no se contabilizan.
                     </p>
+
+                    <button
+                        onClick={async () => {
+                            if (!window.confirm("¿Estás seguro de BORRAR el historial de simulaciones para empezar de cero?")) return;
+
+                            try {
+                                const res = await fetch('/api/admin/reset-logs');
+                                if (res.ok) {
+                                    alert("✅ Historial reseteado correctamente.");
+                                    window.location.reload();
+                                } else {
+                                    alert("❌ Error al resetear.");
+                                }
+                            } catch (e) {
+                                console.error(e);
+                                alert("❌ Error de conexión.");
+                            }
+                        }}
+                        className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-xs font-bold transition-all border border-red-500/20 mx-auto"
+                    >
+                        🗑️ Resetear Contador a Cero
+                    </button>
                 </div>
             </div>
         </div>
