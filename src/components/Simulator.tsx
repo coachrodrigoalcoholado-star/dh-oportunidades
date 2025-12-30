@@ -126,8 +126,15 @@ export default function Simulator() {
 
             if (!blob) throw new Error("No se pudo generar el archivo.");
             const cleanAmount = amount.replace(/\./g, "").replace(/,/g, "");
-            const prefix = mode === 'loans' ? 'PRESTAMO' : 'CALZADO';
-            saveAs(blob, `${prefix}_DH_${cleanAmount}.jpg`);
+
+            let filename;
+            if (mode === 'loans') {
+                filename = `PRESTAMO_DH_${cleanAmount}.jpg`;
+            } else {
+                filename = `CALZADOS - DH OPORTUNIDADES.jpg`;
+            }
+
+            saveAs(blob, filename);
 
             setIsGenerating(false);
             logSimulation('download');
