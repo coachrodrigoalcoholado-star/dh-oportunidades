@@ -136,11 +136,7 @@ export default function LoginPage() {
                     </form>
                 </motion.div>
 
-                <div className="mt-8 text-center">
-                    <Link href="/" className="text-gray-500 text-xs hover:text-dh-gold transition-colors">
-                        ← Volver al Simulador (Público)
-                    </Link>
-                </div>
+
             </div>
         </main>
     );
