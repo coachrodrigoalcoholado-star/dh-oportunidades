@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto">
                 {/* Simulator Shortcut */}
-                <Link href="/simulador" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/admin/simulator" onClick={() => setIsMobileMenuOpen(false)}>
                     <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-dh-gold bg-dh-gold/10 hover:bg-dh-gold/20 transition-all border border-dh-gold/20 mb-2">
                         <Calculator className="w-5 h-5" />
                         <span className="text-sm font-bold">Simulador DH</span>
