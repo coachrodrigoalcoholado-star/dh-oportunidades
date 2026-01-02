@@ -133,14 +133,13 @@ export default function FootwearSimulator() {
             await new Promise(resolve => setTimeout(resolve, 500));
 
             const blob = await toBlob(flyerRef.current, {
-                quality: 1,
+                quality: 0.95,
                 backgroundColor: '#020617',
                 pixelRatio: 2,
                 style: {
-                    opacity: '1',
                     visibility: 'visible',
-                    display: 'block',
-                    transform: 'none', // Prevent inheritance of transforms that might hide it
+                    opacity: '1',
+                    transform: 'none',
                 }
             });
 
@@ -305,9 +304,8 @@ export default function FootwearSimulator() {
             </motion.div>
 
             {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
-            {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
             <div
-                className="fixed bottom-0 right-0 z-[-50] opacity-0 pointer-events-none"
+                className="fixed top-0 left-0 w-[800px] z-[-50] invisible"
                 ref={flyerRef}
             >
                 <div
