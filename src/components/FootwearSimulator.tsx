@@ -136,11 +136,6 @@ export default function FootwearSimulator() {
                 quality: 0.95,
                 backgroundColor: '#020617',
                 pixelRatio: 2,
-                style: {
-                    visibility: 'visible',
-                    opacity: '1',
-                    transform: 'none',
-                }
             });
 
             if (blob) {
@@ -305,7 +300,7 @@ export default function FootwearSimulator() {
 
             {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
             <div
-                className="fixed top-0 left-0 w-[800px] z-[-50] invisible"
+                className="fixed top-0 left-[-3000px] z-50"
                 ref={flyerRef}
             >
                 <div
