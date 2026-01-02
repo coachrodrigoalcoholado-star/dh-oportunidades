@@ -135,6 +135,7 @@ export default function PublicSimulatorPage() {
                             minLimit={client?.minAmount}
                             maxLimit={client?.maxAmount}
                             onSolicitar={handleSolicitar}
+                            hideHeader={true}
                         />
 
                         <div className="text-center mt-6">

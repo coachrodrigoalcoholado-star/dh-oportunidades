@@ -25,9 +25,10 @@ interface SimulatorProps {
     maxLimit?: number;
     forcedMode?: string;
     onSolicitar?: (amount: number, installments: number, installmentValue: number) => void;
+    hideHeader?: boolean;
 }
 
-export default function Simulator({ minLimit: propMin, maxLimit: propMax, forcedMode, onSolicitar }: SimulatorProps) {
+export default function Simulator({ minLimit: propMin, maxLimit: propMax, forcedMode, onSolicitar, hideHeader }: SimulatorProps) {
     const { user, signOut } = useAuth();
     const router = useRouter();
 
@@ -336,20 +337,22 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
         <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6 relative">
 
             {/* Header with User Info */}
-            <div className="flex justify-between items-center bg-black/40 px-4 py-3 rounded-full border border-white/5 mx-2">
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-sm text-gray-200 font-bold uppercase tracking-wide">
-                        Bienvenido, <span className="text-dh-gold">{clientName}</span>
-                    </span>
+            {!hideHeader && (
+                <div className="flex justify-between items-center bg-black/40 px-4 py-3 rounded-full border border-white/5 mx-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-sm text-gray-200 font-bold uppercase tracking-wide">
+                            Bienvenido, <span className="text-dh-gold">{clientName}</span>
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => { setStep('validation'); setAmount(''); setClientName(''); }}
+                        className="text-xs text-gray-500 hover:text-white flex items-center gap-1 transition-colors"
+                    >
+                        Salir
+                    </button>
                 </div>
-                <button
-                    onClick={() => { setStep('validation'); setAmount(''); setClientName(''); }}
-                    className="text-xs text-gray-500 hover:text-white flex items-center gap-1 transition-colors"
-                >
-                    Salir
-                </button>
-            </div>
+            )}
 
             {/* AMOUNT INPUT */}
             <motion.div
