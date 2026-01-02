@@ -133,7 +133,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     Cerrar Sesión
                 </button>
                 <div className="mt-4 text-[10px] text-center text-gray-700">
-                    v1.1.0 Internal
+                    v2.2 Internal
                 </div>
             </div>
         </div>
