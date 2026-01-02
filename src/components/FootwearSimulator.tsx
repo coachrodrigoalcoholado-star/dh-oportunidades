@@ -337,9 +337,7 @@ export default function FootwearSimulator() {
                             <p className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-2">
                                 "{observation || 'Consultar Modelo'}"
                             </p>
-                            <p className="text-dh-gold text-lg font-medium opacity-80 mt-2">
-                                Precio de Lista: ${getNumericAmount().toLocaleString('es-AR')}
-                            </p>
+
                         </div>
                     </div>
 
