@@ -382,6 +382,24 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
                 </div>
             </motion.div>
 
+            {/* QUICK ACTIONS FOR ADMIN */}
+            {user && hasAmount && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-end -mt-2 mb-4"
+                >
+                    <button
+                        onClick={handleDownload}
+                        disabled={isGenerating}
+                        className="text-xs flex items-center gap-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 px-4 py-2 rounded-lg transition-all"
+                    >
+                        {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                        Descargar Presupuesto Completo
+                    </button>
+                </motion.div>
+            )}
+
             {/* SIMULATOR & SELECTION */}
             <AnimatePresence>
                 {hasAmount && (
