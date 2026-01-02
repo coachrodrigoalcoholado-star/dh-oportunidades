@@ -136,6 +136,12 @@ export default function FootwearSimulator() {
                 quality: 1,
                 backgroundColor: '#020617',
                 pixelRatio: 2,
+                style: {
+                    opacity: '1',
+                    visibility: 'visible',
+                    display: 'block',
+                    transform: 'none', // Prevent inheritance of transforms that might hide it
+                }
             });
 
             if (blob) {
