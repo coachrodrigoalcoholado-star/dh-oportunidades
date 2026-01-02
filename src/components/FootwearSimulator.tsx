@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, DollarSign, Wallet, ArrowRight, Loader2, MessageCircle, AlertCircle } from "lucide-react";
+import { ShoppingBag, DollarSign, Wallet, ArrowRight, Loader2, MessageCircle, AlertCircle, Download, FileText } from "lucide-react";
 import { toBlob } from "html-to-image";
 import { saveAs } from "file-saver";
 
@@ -26,6 +26,7 @@ const generateOperationCode = (amount: number, installments: number) => {
 export default function FootwearSimulator() {
     // State
     const [amount, setAmount] = useState<string>("");
+    const [observation, setObservation] = useState("");
     const [isGenerating, setIsGenerating] = useState(false);
     const [selectedInstallment, setSelectedInstallment] = useState<number | null>(null);
 
@@ -34,6 +35,7 @@ export default function FootwearSimulator() {
     const [loadingConfig, setLoadingConfig] = useState(true);
 
     const cardRef = useRef<HTMLDivElement>(null);
+    const flyerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         fetchConfig();
@@ -84,7 +86,7 @@ export default function FootwearSimulator() {
                     userId: 'admin',
                     amount: getNumericAmount(),
                     installments: selectedInstallment || 0,
-                    metadata: { type: 'footwear', action, markup: config.markup, operationCode }
+                    metadata: { type: 'footwear', action, markup: config.markup, operationCode, observation }
                 })
             });
             const data = await res.json();
@@ -107,7 +109,7 @@ export default function FootwearSimulator() {
             const operationCode = generateOperationCode(numericAmount, selectedInstallment);
             logSimulation('whatsapp', operationCode).catch(console.error);
 
-            const message = `Hola, consulta por Zapatillas.\n\nCosto Producto: $${numericAmount.toLocaleString('es-AR')}\nPrecio Final: $${total.toLocaleString('es-AR')}\nPlan: ${selectedInstallment} cuotas de $${installmentValue.toLocaleString('es-AR', { maximumFractionDigits: 0 })}\n\n🔐 Código: #${operationCode}`;
+            const message = `Hola, consulta por Zapatillas.\n\nMdelo: *${observation}*\nCosto Producto: $${numericAmount.toLocaleString('es-AR')}\nPrecio Final: $${total.toLocaleString('es-AR')}\nPlan: ${selectedInstallment} cuotas de $${installmentValue.toLocaleString('es-AR', { maximumFractionDigits: 0 })}\n\n🔐 Código: #${operationCode}`;
 
             const url = `https://wa.me/5492614194014?text=${encodeURIComponent(message)}`;
             window.open(url, '_blank');
@@ -121,7 +123,7 @@ export default function FootwearSimulator() {
     };
 
     const handleDownload = async () => {
-        if (!cardRef.current || !selectedInstallment) return;
+        if (!flyerRef.current) return;
         setIsGenerating(true);
 
         try {
@@ -130,14 +132,14 @@ export default function FootwearSimulator() {
             // Wait for fonts/images
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            const blob = await toBlob(cardRef.current, {
+            const blob = await toBlob(flyerRef.current, {
                 quality: 1,
-                backgroundColor: '#000000',
+                backgroundColor: '#020617',
                 pixelRatio: 2,
             });
 
             if (blob) {
-                saveAs(blob, `DH_Calzado_${amount}.png`);
+                saveAs(blob, `DH_Calzado_${observation || 'Presupuesto'}.png`);
             }
         } catch (error) {
             console.error("Error generating flyer:", error);
@@ -194,9 +196,44 @@ export default function FootwearSimulator() {
                         </div>
                     </div>
 
+                    {/* Observation Input */}
+                    <div className="space-y-2">
+                        <label className="text-gray-400 text-xs font-bold uppercase tracking-wider ml-1 flex items-center gap-2">
+                            <FileText className="w-3 h-3 text-indigo-400" />
+                            Observación / Modelo
+                        </label>
+                        <input
+                            type="text"
+                            value={observation}
+                            onChange={(e) => setObservation(e.target.value)}
+                            placeholder="Ej: Nike Air Force 1 Talle 40"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-indigo-500 transition-colors"
+                        />
+                    </div>
+
                     {/* Installments Grid */}
                     {getNumericAmount() > 0 && (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
+                            <div className="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-lg flex gap-3">
+                                <AlertCircle className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                                <div className="text-xs text-indigo-200">
+                                    <p className="font-bold">Markup Aplicado: {config.markup}%</p>
+                                    <p className="opacity-70">Precio Final: ${(getNumericAmount() * (1 + config.markup / 100)).toLocaleString('es-AR')}</p>
+                                </div>
+                            </div>
+
+                            {/* DOWNLOAD BUTTON */}
+                            <button
+                                onClick={handleDownload}
+                                disabled={isGenerating}
+                                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
+                            >
+                                {isGenerating ? <Loader2 className="w-6 h-6 animate-spin" /> : <Download className="w-6 h-6" />}
+                                DESCARGAR PRESUPUESTO
+                            </button>
+
+                            <hr className="border-white/10" />
+
                             <label className="text-gray-400 text-xs font-bold uppercase tracking-wider ml-1 flex items-center gap-2">
                                 <Wallet className="w-3 h-3 text-indigo-400" />
                                 Planes Disponibles
@@ -232,14 +269,6 @@ export default function FootwearSimulator() {
                                 })}
                             </div>
 
-                            {/* Info Box */}
-                            <div className="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-lg flex gap-3">
-                                <AlertCircle className="w-5 h-5 text-indigo-400 flex-shrink-0" />
-                                <div className="text-xs text-indigo-200">
-                                    <p className="font-bold">Markup Aplicado: {config.markup}%</p>
-                                    <p className="opacity-70">Precio Final: ${(getNumericAmount() * (1 + config.markup / 100)).toLocaleString('es-AR')}</p>
-                                </div>
-                            </div>
                         </div>
                     )}
 
@@ -260,15 +289,6 @@ export default function FootwearSimulator() {
                                     {isGenerating ? <Loader2 className="animate-spin" /> : <MessageCircle className="w-6 h-6" />}
                                     SOLICITAR POR WHATSAPP
                                 </button>
-
-                                <button
-                                    onClick={handleDownload}
-                                    disabled={isGenerating}
-                                    className="w-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-sm font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition-colors border border-white/5"
-                                >
-                                    <ArrowRight className="w-4 h-4" />
-                                    Descargar Presupuesto
-                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -277,6 +297,53 @@ export default function FootwearSimulator() {
                 {/* Footer Decoration */}
                 <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
             </motion.div>
+
+            {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
+            <div className="absolute top-0 left-[-9999px]" ref={flyerRef}>
+                <div
+                    className="w-[800px] bg-[#020617] text-white p-12 rounded-3xl relative overflow-hidden border border-indigo-500/30"
+                    style={{
+                        backgroundImage: "radial-gradient(circle at top right, rgba(79, 70, 229, 0.15), transparent 40%)"
+                    }}
+                >
+                    {/* Watermark */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/5 blur-[100px] rounded-full pointer-events-none" />
+
+                    {/* Header */}
+                    <div className="flex flex-col items-center justify-center mb-10 relative z-10">
+                        <img src="/logo-new.png" alt="DH" className="h-32 object-contain mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+                        <h2 className="text-3xl font-black tracking-tight text-white mb-2">PRESUPUESTO CALZADO</h2>
+                        <div className="h-1 w-24 bg-indigo-500 rounded-full" />
+                    </div>
+
+                    {/* Observation */}
+                    {observation && (
+                        <div className="mb-10 text-center relative z-10 bg-white/5 p-6 rounded-2xl border border-white/10 mx-10">
+                            <p className="text-indigo-300 text-sm font-bold uppercase tracking-widest mb-2">Modelo / Descripción</p>
+                            <p className="text-3xl font-bold text-white leading-tight">"{observation}"</p>
+                        </div>
+                    )}
+
+                    {/* Grid of Installments */}
+                    <div className="grid grid-cols-2 gap-4 relative z-10 px-8">
+                        {config.quotas.map((q) => {
+                            const value = calculateInstallmentValue(q);
+                            return (
+                                <div key={q} className="bg-gradient-to-br from-white/10 to-transparent p-6 rounded-2xl border border-white/10 flex flex-col items-center justify-center">
+                                    <span className="text-indigo-300 text-lg font-bold mb-1">{q} Cuotas de</span>
+                                    <span className="text-5xl font-black text-white tracking-tighter">
+                                        ${value.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                                    </span>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="mt-10 text-center relative z-10 opacity-50">
+                        <p className="text-sm">Presupuesto válido por 24hs. Sujeto a disponibilidad.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
