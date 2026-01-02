@@ -385,17 +385,17 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
             {/* QUICK ACTIONS FOR ADMIN */}
             {user && hasAmount && (
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex justify-end -mt-2 mb-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6"
                 >
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="text-xs flex items-center gap-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 px-4 py-2 rounded-lg transition-all"
+                        className="w-full bg-dh-gold hover:bg-yellow-500 text-black font-black text-lg py-4 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
                     >
-                        {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-                        Descargar Presupuesto Completo
+                        {isGenerating ? <Loader2 className="w-6 h-6 animate-spin" /> : <Download className="w-6 h-6" />}
+                        DESCARGAR PRESUPUESTO
                     </button>
                 </motion.div>
             )}
