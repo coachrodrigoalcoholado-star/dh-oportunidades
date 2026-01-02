@@ -386,7 +386,7 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
             </motion.div>
 
             {/* QUICK ACTIONS FOR ADMIN */}
-            {user && hasAmount && (
+            {user && hasAmount && !hideHeader && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
