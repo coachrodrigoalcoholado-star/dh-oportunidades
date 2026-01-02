@@ -45,7 +45,7 @@ export default function PublicSimulatorPage() {
         const message = `Hola, soy ${client?.fullName || 'Cliente'} (DNI: ${dni}).\nQuiero solicitar un préstamo de *$${amount.toLocaleString('es-AR')}*.\nPlan seleccionado: *${installments} cuotas de $${Math.round(val).toLocaleString('es-AR')}*.`;
 
         // Encode URL
-        const phone = "5492615163475"; // Replace with real company number provided later or env var
+        const phone = "5492616097457"; // Updated to correct company number
         const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
         window.open(url, '_blank');
@@ -107,7 +107,7 @@ export default function PublicSimulatorPage() {
                                     Por favor, comunicate con DH OPORTUNIDADES.
                                 </p>
                                 <a
-                                    href="https://wa.me/5492616097457"
+                                    href="https://wa.me/5492616097457?text=Hola,%20no%20pude%20validar%20mi%20DNI.%20Necesito%20ayuda."
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-900/20"
