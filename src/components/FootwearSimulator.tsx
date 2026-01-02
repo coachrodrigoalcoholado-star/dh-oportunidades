@@ -111,7 +111,7 @@ export default function FootwearSimulator() {
 
             const message = `Hola, consulta por Zapatillas.\n\nMdelo: *${observation}*\nCosto Producto: $${numericAmount.toLocaleString('es-AR')}\nPrecio Final: $${total.toLocaleString('es-AR')}\nPlan: ${selectedInstallment} cuotas de $${installmentValue.toLocaleString('es-AR', { maximumFractionDigits: 0 })}\n\n🔐 Código: #${operationCode}`;
 
-            const url = `https://wa.me/5492614194014?text=${encodeURIComponent(message)}`;
+            const url = `https://wa.me/5492616097457?text=${encodeURIComponent(message)}`;
             window.open(url, '_blank');
 
         } catch (error) {
