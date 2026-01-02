@@ -23,14 +23,16 @@ const DEFAULT_RATES: RateConfig = { 4: 0.35, 6: 0.47, 8: 0.65, 10: 0.85 };
 interface SimulatorProps {
     minLimit?: number;
     maxLimit?: number;
+    forcedMode?: string;
+    onSolicitar?: (amount: number, installments: number, installmentValue: number) => void;
 }
 
-export default function Simulator({ minLimit: propMin, maxLimit: propMax }: SimulatorProps) {
+export default function Simulator({ minLimit: propMin, maxLimit: propMax, forcedMode, onSolicitar }: SimulatorProps) {
     const { user, signOut } = useAuth();
     const router = useRouter();
 
     // State
-    const [step, setStep] = useState<'validation' | 'simulator'>('validation');
+    const [step, setStep] = useState<'validation' | 'simulator'>(forcedMode ? 'simulator' : 'validation');
 
     // Auth / Client Data
     const [dni, setDni] = useState("");
@@ -171,11 +173,19 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax }: Simu
     const handleSolicitar = async () => {
         if (!selectedInstallment) return;
 
+        const numericAmount = getNumericAmount();
+        const data = calculateLoan(numericAmount, selectedInstallment);
+
+        // If external handler is provided, use it
+        if (onSolicitar) {
+            onSolicitar(numericAmount, selectedInstallment, data.installmentValue);
+            return;
+        }
+
         setIsGenerating(true);
 
         try {
             // 1. Generate Local Operation Code
-            const numericAmount = getNumericAmount();
             const operationCode = generateOperationCode(numericAmount, selectedInstallment);
 
             // 2. Log in Background (Fire and forget)
