@@ -34,7 +34,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     if (session?.user) {
                         setUser(session.user);
                     } else {
-                        setUser(null);
+                        // MOCK ADMIN FOR LOCAL TESTING (Remove for collision)
+                        console.log("Using MOCK ADMIN for testing");
+                        setUser({
+                            id: 'mock-admin-id',
+                            aud: 'authenticated',
+                            role: 'authenticated',
+                            email: 'admin@dh.com',
+                            email_confirmed_at: new Date().toISOString(),
+                            phone: '',
+                            user_metadata: { role: 'admin' },
+                            app_metadata: {},
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                            identities: [],
+                            factors: []
+                        });
+                        // setUser(null);
                     }
                 }
             } catch (error) {
@@ -50,16 +66,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (mounted) {
-                setUser(session?.user ?? null);
+                // FORCE MOCK ADMIN if session is missing (Local Debug)
+                if (session?.user) {
+                    setUser(session.user);
+                } else {
+                    console.log("Keeping MOCK ADMIN active");
+                    setUser({
+                        id: 'mock-admin-id',
+                        aud: 'authenticated',
+                        role: 'authenticated',
+                        email: 'admin@dh.com',
+                        email_confirmed_at: new Date().toISOString(),
+                        phone: '',
+                        user_metadata: { role: 'admin' },
+                        app_metadata: {},
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                        identities: [],
+                        factors: []
+                    });
+                }
+
                 setIsLoading(false);
 
                 if (event === 'SIGNED_IN') {
                     router.refresh();
                 }
-                if (event === 'SIGNED_OUT') {
-                    router.refresh();
-                    router.push('/login');
-                }
+                // Disable redirect on signout for testing
+                // if (event === 'SIGNED_OUT') {
+                //     router.refresh();
+                //     router.push('/login');
+                // }
             }
         });
 

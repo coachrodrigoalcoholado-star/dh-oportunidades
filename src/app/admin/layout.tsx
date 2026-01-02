@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const navItems = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, requiredRole: 'admin' },
-        { name: 'Usuarios', href: '/admin/users', icon: Users, requiredRole: 'admin' },
+        { name: 'Clientes', href: '/admin/clients', icon: Users, requiredRole: 'admin' },
         { name: 'Configuración', href: '/admin/config', icon: Settings, requiredRole: 'admin' },
     ];
 

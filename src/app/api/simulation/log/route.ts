@@ -24,7 +24,7 @@ export async function POST(req: Request) {
             }
         );
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('simulations_log')
             .insert({
                 user_id: userId,
@@ -32,14 +32,16 @@ export async function POST(req: Request) {
                 installments_selected: installments || 0,
                 metadata: metadata || {},
                 created_at: new Date().toISOString()
-            });
+            })
+            .select('id')
+            .single();
 
         if (error) {
             console.error('Supabase Insert Error:', error);
             throw error;
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, code: data?.id });
 
     } catch (error: any) {
         console.error('Simulation Log Error:', error);

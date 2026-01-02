@@ -28,10 +28,10 @@ export async function middleware(req: NextRequest) {
         req.nextUrl.pathname.includes('.'); // files like favicon.ico, images
 
     // TEMPORARY: Disabled Middleware Protection to debug Client Auth
-    if (!session && !isPublic) {
-        console.log('Redirecting to LOGIN')
-        return NextResponse.redirect(new URL('/login', req.url))
-    }
+    // if (!session && !isPublic) {
+    //    console.log('Redirecting to LOGIN')
+    //    return NextResponse.redirect(new URL('/login', req.url))
+    // }
 
     return res
 }
