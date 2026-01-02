@@ -298,9 +298,9 @@ export default function FootwearSimulator() {
                 <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
             </motion.div>
 
-            {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
+            {/* OFF-SCREEN FLYER GENERATION (Hidden but rendered in viewport) */}
             <div
-                className="fixed top-0 left-[-3000px] z-50"
+                className="fixed top-[50px] left-[50px] z-[-50]"
                 ref={flyerRef}
             >
                 <div
