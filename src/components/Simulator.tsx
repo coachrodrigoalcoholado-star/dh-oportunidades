@@ -200,7 +200,7 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
 
             message += `\n\n🔐 Código de Operación: #${operationCode}`;
 
-            const url = `https://wa.me/5492614194014?text=${encodeURIComponent(message)}`;
+            const url = `https://wa.me/5492616097457?text=${encodeURIComponent(message)}`;
 
             // 4. Open WhatsApp Immediately
             window.open(url, '_blank');

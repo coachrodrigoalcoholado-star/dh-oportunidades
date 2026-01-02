@@ -107,7 +107,7 @@ export default function PublicSimulatorPage() {
                                     Por favor, comunicate con DH OPORTUNIDADES.
                                 </p>
                                 <a
-                                    href="https://wa.me/5492615163475"
+                                    href="https://wa.me/5492616097457"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-900/20"
