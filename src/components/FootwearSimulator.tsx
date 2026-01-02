@@ -134,8 +134,12 @@ export default function FootwearSimulator() {
 
             const blob = await toBlob(flyerRef.current, {
                 quality: 0.95,
-                backgroundColor: '#020617',
-                pixelRatio: 2,
+                backgroundColor: "#020617",
+                cacheBust: true,
+                style: {
+                    backgroundColor: "#020617",
+                    backgroundImage: "linear-gradient(to bottom right, #020617, #0f172a, #000000)",
+                }
             });
 
             if (blob) {
@@ -298,13 +302,13 @@ export default function FootwearSimulator() {
                 <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
             </motion.div>
 
-            {/* OFF-SCREEN FLYER GENERATION (Hidden but rendered in viewport) */}
-            <div
-                className="fixed top-[50px] left-[50px] z-[-50]"
-                ref={flyerRef}
-            >
+            {/* VISUAL PREVIEW OF FLYER (Rendered inline for reliable capture) */}
+            <div className="mt-12 w-full flex flex-col items-center border-t border-white/10 pt-8">
+                <p className="text-gray-500 text-xs uppercase tracking-widest mb-6">Vista Previa del Flyer (Cliente)</p>
+
                 <div
-                    className="w-[800px] bg-[#020617] text-white p-12 rounded-3xl relative overflow-hidden border border-indigo-500/30"
+                    ref={flyerRef}
+                    className="w-full max-w-[800px] bg-[#020617] text-white p-12 rounded-3xl relative overflow-hidden border border-indigo-500/30 transform transition-all hover:scale-[1.01] shadow-2xl"
                     style={{
                         backgroundImage: "radial-gradient(circle at top right, rgba(79, 70, 229, 0.15), #020617 60%)"
                     }}
