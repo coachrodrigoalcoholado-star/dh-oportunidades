@@ -249,8 +249,8 @@ export default function FootwearSimulator() {
                                             key={q}
                                             onClick={() => setSelectedInstallment(q)}
                                             className={`relative overflow-hidden rounded-xl p-4 transition-all duration-300 border group ${isSelected
-                                                    ? 'bg-indigo-600 border-indigo-400 shadow-[0_0_20px_rgba(79,70,229,0.4)]'
-                                                    : 'bg-indigo-900/10 border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40'
+                                                ? 'bg-indigo-600 border-indigo-400 shadow-[0_0_20px_rgba(79,70,229,0.4)]'
+                                                : 'bg-indigo-900/10 border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40'
                                                 }`}
                                         >
                                             <div className="flex flex-col items-start gap-1">
@@ -299,11 +299,15 @@ export default function FootwearSimulator() {
             </motion.div>
 
             {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
-            <div className="absolute top-0 left-[-9999px]" ref={flyerRef}>
+            {/* OFF-SCREEN FLYER GENERATION (Hidden) */}
+            <div
+                className="fixed bottom-0 right-0 z-[-50] opacity-0 pointer-events-none"
+                ref={flyerRef}
+            >
                 <div
                     className="w-[800px] bg-[#020617] text-white p-12 rounded-3xl relative overflow-hidden border border-indigo-500/30"
                     style={{
-                        backgroundImage: "radial-gradient(circle at top right, rgba(79, 70, 229, 0.15), transparent 40%)"
+                        backgroundImage: "radial-gradient(circle at top right, rgba(79, 70, 229, 0.15), #020617 60%)"
                     }}
                 >
                     {/* Watermark */}
@@ -311,7 +315,12 @@ export default function FootwearSimulator() {
 
                     {/* Header */}
                     <div className="flex flex-col items-center justify-center mb-10 relative z-10">
-                        <img src="/logo-new.png" alt="DH" className="h-32 object-contain mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+                        {/* Ensure crossOrigin is anonymous for images to allow capture */}
+                        <img
+                            src="/logo-new.png"
+                            alt="DH"
+                            className="h-32 object-contain mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                        />
                         <h2 className="text-3xl font-black tracking-tight text-white mb-2">PRESUPUESTO CALZADO</h2>
                         <div className="h-1 w-24 bg-indigo-500 rounded-full" />
                     </div>
