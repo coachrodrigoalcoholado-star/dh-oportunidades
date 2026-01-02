@@ -33,7 +33,7 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="py-6 text-center text-[10px] text-gray-700 font-mono tracking-[0.2em] uppercase opacity-40 hover:opacity-100 transition-opacity select-none cursor-default">
-              Powered by DH OPORTUNIDADES v2.0
+              Powered by DH OPORTUNIDADES v2.1
             </footer>
           </div>
         </AuthProvider>
