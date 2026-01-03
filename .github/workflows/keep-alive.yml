@@ -1,45 +1,13 @@
-name: Keep Supabase Alive (Multi-Project)
+name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: "0 9 * * *" # Se ejecuta todos los días a las 9:00 AM UTC
-  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub
+    - cron: '0 0 * * *' # Se ejecuta todos los días a las 00:00 UTC
+  workflow_dispatch:
 
 jobs:
-  wake-up-projects:
+  ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      # PROYECTO 1: DH OPORTUNIDADES
-      - name: Wake up DH OPORTUNIDADES
-        env:
-          URL: ${{ secrets.SUPABASE_URL_DH }}
-          KEY: ${{ secrets.SUPABASE_KEY_DH }}
-        run: |
-          if [ -z "$URL" ]; then
-            echo "⚠️ Faltan secretos para DH OPORTUNIDADES, saltando..."
-          else
-            echo "📡 Enviando señal a DH OPORTUNIDADES..."
-            curl -f -X GET "$URL/rest/v1/" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY"
-            echo "✅ DH OPORTUNIDADES despertado."
-          fi
-
-      # PROYECTO 2: UFLP
-      - name: Wake up UFLP
-        env:
-          URL: ${{ secrets.SUPABASE_URL_UFLP }}
-          KEY: ${{ secrets.SUPABASE_KEY_UFLP }}
-        run: |
-          if [ -z "$URL" ]; then
-            echo "⚠️ Faltan secretos para UFLP, saltando..."
-          else
-            echo "📡 Enviando señal a UFLP..."
-            curl -f -X GET "$URL/rest/v1/" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY"
-            echo "✅ UFLP despertado."
-          fi
+      - name: Ping DH Oportunidades
+        run: curl -I https://dh-oportunidades.vercel.app
