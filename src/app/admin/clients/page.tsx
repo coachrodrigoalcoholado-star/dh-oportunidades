@@ -12,6 +12,37 @@ interface Client {
     created_at: string;
 }
 
+// FORMAT HELPER
+const formatCurrency = (value: string | number) => {
+    if (!value) return "";
+    return Number(value).toLocaleString("es-AR");
+};
+
+const parseCurrency = (value: string) => {
+    return value.replace(/\./g, "");
+};
+
+function FormattedNumberInput({ value, onChange, className, placeholder }: { value: string, onChange: (val: string) => void, className?: string, placeholder?: string }) {
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value.replace(/\./g, '');
+        if (!/^\d*$/.test(raw)) return;
+
+        const formatted = raw ? Number(raw).toLocaleString("es-AR") : "";
+        onChange(formatted);
+    };
+
+    return (
+        <input
+            type="text"
+            value={value}
+            onChange={handleChange}
+            className={className}
+            placeholder={placeholder}
+        />
+    );
+}
+
 export default function ClientsPage() {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,9 +51,17 @@ export default function ClientsPage() {
     // Add Form State
     const [dni, setDni] = useState("");
     const [name, setName] = useState("");
-    const [minAmount, setMinAmount] = useState("50000");
-    const [maxAmount, setMaxAmount] = useState("2000000");
+    const [minAmount, setMinAmount] = useState("50.000");
+    const [maxAmount, setMaxAmount] = useState("2.000.000");
     const [saving, setSaving] = useState(false);
+
+    // Bulk Edit State
+    const [showBulkEdit, setShowBulkEdit] = useState(false);
+    const [bulkMin, setBulkMin] = useState("50.000");
+    const [bulkMax, setBulkMax] = useState("2.000.000");
+    const [bulkUpdating, setBulkUpdating] = useState(false);
+
+
 
     useEffect(() => {
         fetchClients();
@@ -49,7 +88,13 @@ export default function ClientsPage() {
             const res = await fetch('/api/admin/clients', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dni, fullName: name, minAmount, maxAmount })
+
+                body: JSON.stringify({
+                    dni,
+                    fullName: name,
+                    minAmount: parseCurrency(minAmount),
+                    maxAmount: parseCurrency(maxAmount)
+                })
             });
 
             if (res.ok) {
@@ -114,6 +159,59 @@ export default function ClientsPage() {
         }
     }
 
+
+    const handleBulkUpdate = async () => {
+        if (!confirm(`¿Estás seguro de actualizar los montos de ${clients.length} clientes?\n\nMínimo: $${bulkMin}\nMáximo: $${bulkMax}`)) {
+            return;
+        }
+
+        setBulkUpdating(true);
+        // Clean values before sending
+        const minVal = Number(parseCurrency(bulkMin));
+        const maxVal = Number(parseCurrency(bulkMax));
+
+        try {
+            // Frontend-side iteration to utilize existing PUT endpoint
+            const promises = clients.map(client =>
+                fetch('/api/admin/clients', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: client.id,
+                        // Only update amounts
+                        minAmount: minVal,
+                        maxAmount: maxVal
+                    })
+                })
+            );
+
+            await Promise.all(promises);
+
+            alert("Actualización masiva completada con éxito");
+            setShowBulkEdit(false);
+            fetchClients();
+        } catch (error) {
+            console.error(error);
+            alert("Hubo un error en la actualización masiva");
+        } finally {
+            setBulkUpdating(false);
+        }
+    };
+
+    // Modified updateClient to handle special 'all_amounts' case or just reuse loop
+    // Actually, updateClient was designed for single field. Let's make a specific loop in handleBulkUpdate
+    // calling the API directly or reusing updateClient if adapted.
+    // Let's adapt existing updateClient to handle standard calls, but for bulk we need a slight tweak or just call fetch directly.
+    // To keep it simple, I'll just refactor updateClient slightly or use a direct fetch in the loop above?
+    // Let's refactor updateClient to allow generic updates or just use a helper.
+    // Actually, looking at updateClient, it does a fetch PUT. I can just call that inside the loop.
+    // BUT updateClient updates state locally too. 
+    // Let's NOT use updateClient inside the loop to avoid 1000 rerenders. 
+    // Instead, loop the FETCH and then fetchClients() at the end.
+
+    // REDEFINING handleBulkUpdate properly:
+
+
     // Filter Logic
     const filteredClients = useMemo(() => {
         if (!searchTerm) return clients;
@@ -129,6 +227,51 @@ export default function ClientsPage() {
             <h1 className="text-3xl font-black text-white tracking-tighter">
                 Base de Datos <span className="text-dh-gold">Clientes</span>
             </h1>
+
+            {/* BULK EDIT TOGGLE */}
+            <div className="flex justify-end -mt-4">
+                <button
+                    onClick={() => setShowBulkEdit(!showBulkEdit)}
+                    className="text-xs text-dh-gold hover:underline flex items-center gap-1"
+                >
+                    {showBulkEdit ? 'Cancelar Edición Masiva' : 'Habilitar Edición Masiva'}
+                </button>
+            </div>
+
+            {/* BULK EDIT PANEL */}
+            {showBulkEdit && (
+                <div className="bg-dh-gold/10 border border-dh-gold/30 p-4 rounded-xl mb-6 animate-in fade-in slide-in-from-top-4">
+                    <h3 className="text-dh-gold font-bold mb-3 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        Edición Masiva (Afecta a {clients.length} clientes)
+                    </h3>
+                    <div className="flex gap-4 items-end">
+                        <div className="flex-1">
+                            <label className="block text-xs font-bold text-dh-gold/70 mb-1">Nuevo Mínimo Global</label>
+                            <FormattedNumberInput
+                                value={bulkMin}
+                                onChange={setBulkMin}
+                                className="input-dh border-dh-gold/50"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-xs font-bold text-dh-gold/70 mb-1">Nuevo Máximo Global</label>
+                            <FormattedNumberInput
+                                value={bulkMax}
+                                onChange={setBulkMax}
+                                className="input-dh border-dh-gold/50"
+                            />
+                        </div>
+                        <button
+                            onClick={handleBulkUpdate}
+                            disabled={bulkUpdating}
+                            className="bg-dh-gold text-black font-bold h-[46px] px-6 rounded-lg hover:bg-white transition-colors"
+                        >
+                            {bulkUpdating ? 'Actualizando...' : 'Aplicar a Todos'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ADD FORM */}
             <div className="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md">
@@ -147,11 +290,11 @@ export default function ClientsPage() {
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-400 mb-1">Mínimo ($)</label>
-                        <input type="number" value={minAmount} onChange={e => setMinAmount(e.target.value)} className="input-dh" />
+                        <FormattedNumberInput value={minAmount} onChange={setMinAmount} className="input-dh" />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-400 mb-1">Máximo ($)</label>
-                        <input type="number" value={maxAmount} onChange={e => setMaxAmount(e.target.value)} className="input-dh" />
+                        <FormattedNumberInput value={maxAmount} onChange={setMaxAmount} className="input-dh" />
                     </div>
                     <button disabled={saving} className="btn-dh-gold h-[46px]">
                         {saving ? '...' : 'Guardar'}
@@ -264,6 +407,7 @@ export default function ClientsPage() {
     );
 }
 
+
 // Sub-component for Click-to-Edit
 function EditableCell({ value, onSave, type = 'text' }: { value: string | number, onSave: (val: string) => void, type?: 'text' | 'currency' }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -271,6 +415,12 @@ function EditableCell({ value, onSave, type = 'text' }: { value: string | number
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        // If type is currency, value comes as number from DB. 
+        // We format it for display if not editing.
+        // When editing, we want the number.
+        // Wait, EditableCell needs to handle the input format too? 
+        // The user request "agregar los puntos y comas... dado que al ingresar o editar no se visualiza"
+        // YES, even in the inline edit.
         setCurrentValue(value);
     }, [value]);
 
@@ -282,8 +432,10 @@ function EditableCell({ value, onSave, type = 'text' }: { value: string | number
 
     const handleBlur = () => {
         setIsEditing(false);
-        if (currentValue != value) { // Loose equality for number/string match
-            onSave(String(currentValue));
+        // Clean format before saving
+        const cleanVal = String(currentValue).replace(/\./g, '');
+        if (cleanVal != String(value)) {
+            onSave(cleanVal);
         }
     };
 
@@ -293,13 +445,34 @@ function EditableCell({ value, onSave, type = 'text' }: { value: string | number
         }
     };
 
+    const handleFormatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value.replace(/\./g, '');
+        if (!/^\d*$/.test(raw)) return;
+        const formatted = raw ? Number(raw).toLocaleString("es-AR") : "";
+        setCurrentValue(formatted); // Store FORMATTED value in local state during edit
+    }
+
     if (isEditing) {
+        if (type === 'currency') {
+            return (
+                <input
+                    ref={inputRef}
+                    type="text"
+                    value={String(currentValue).includes('.') ? currentValue : Number(currentValue).toLocaleString('es-AR')} // Ensure it shows formatted on entry
+                    onChange={handleFormatChange}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
+                    className="bg-black border border-dh-gold rounded p-1 w-full text-white outline-none min-w-[100px]"
+                />
+            )
+        }
         return (
             <input
                 ref={inputRef}
-                type={type === 'currency' ? 'number' : 'text'}
+                type="text"
                 value={currentValue}
                 onChange={(e) => setCurrentValue(e.target.value)}
+                // ... rest
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 className="bg-black border border-dh-gold rounded p-1 w-full text-white outline-none min-w-[100px]"
