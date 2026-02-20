@@ -31,6 +31,7 @@ interface SimulatorProps {
 export default function Simulator({ minLimit: propMin, maxLimit: propMax, forcedMode, onSolicitar, hideHeader }: SimulatorProps) {
     const { user, signOut } = useAuth();
     const router = useRouter();
+    const isAdmin = user?.user_metadata?.role === 'admin';
 
     // State
     const [step, setStep] = useState<'validation' | 'simulator'>(forcedMode ? 'simulator' : 'validation');
@@ -119,7 +120,7 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
 
         const effectiveMax = clientLimits?.max || propMax || 2000000;
 
-        if (numericValue > effectiveMax) {
+        if (!isAdmin && numericValue > effectiveMax) {
             numericValue = effectiveMax;
         }
 
@@ -365,7 +366,7 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
                         <label className="text-gray-400 text-sm font-uppercase tracking-wider">
                             Monto a Solicitar
                         </label>
-                        {clientLimits && (
+                        {clientLimits && !isAdmin && (
                             <span className="text-[10px] text-dh-gold bg-dh-gold/10 px-2 py-1 rounded">
                                 Max: ${clientLimits.max.toLocaleString('es-AR')}
                             </span>
