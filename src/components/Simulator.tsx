@@ -19,6 +19,7 @@ interface RateConfig {
 }
 
 const DEFAULT_RATES: RateConfig = { 4: 0.35, 6: 0.47, 8: 0.65, 10: 0.85 };
+const DEFAULT_RATES_HIGH: RateConfig = { 4: 0.20, 6: 0.30, 8: 0.40, 10: 0.70 };
 
 interface SimulatorProps {
     minLimit?: number;
@@ -51,6 +52,7 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
 
     // Config
     const [rates, setRates] = useState<RateConfig>(DEFAULT_RATES);
+    const [ratesHigh, setRatesHigh] = useState<RateConfig>(DEFAULT_RATES_HIGH);
     const [loadingConfig, setLoadingConfig] = useState(true);
 
     const cardRef = useRef<HTMLDivElement>(null);
@@ -64,6 +66,7 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
             const res = await fetch('/api/admin/config');
             const data = await res.json();
             if (data?.rates) setRates(data.rates);
+            if (data?.ratesHigh) setRatesHigh(data.ratesHigh);
         } catch (error) {
             console.error("Using default config due to error:", error);
         } finally {
@@ -134,7 +137,8 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
     };
 
     const calculateLoan = (capital: number, installments: number): LoanResult => {
-        const rate = rates[installments] || 0.50;
+        const currentRates = capital >= 1500000 ? ratesHigh : rates;
+        const rate = currentRates[installments] || 0.50;
         const total = capital + (capital * rate);
         const installmentValue = total / installments;
         return { installments, total, installmentValue };
@@ -247,7 +251,8 @@ export default function Simulator({ minLimit: propMin, maxLimit: propMax, forced
     };
 
     const hasAmount = getNumericAmount() > 0;
-    const activeInstallments = Object.keys(rates).map(Number).sort((a, b) => a - b);
+    const currentRates = getNumericAmount() >= 1500000 ? ratesHigh : rates;
+    const activeInstallments = Object.keys(currentRates).map(Number).sort((a, b) => a - b);
 
     // --- RENDER ---
 

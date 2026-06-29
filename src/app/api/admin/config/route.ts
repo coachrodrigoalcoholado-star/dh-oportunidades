@@ -16,17 +16,18 @@ export async function GET() {
             }
         );
 
-        // Fetch both configs
+        // Fetch all configs
         const { data, error } = await supabase
             .from('app_config')
             .select('key, value')
-            .in('key', ['rates_config', 'footwear_config']);
+            .in('key', ['rates_config', 'rates_high_config', 'footwear_config']);
 
         if (error) throw error;
 
         // Transform to easy object
         const config = {
             rates: data?.find(d => d.key === 'rates_config')?.value || null,
+            ratesHigh: data?.find(d => d.key === 'rates_high_config')?.value || null,
             footwear: data?.find(d => d.key === 'footwear_config')?.value || null
         };
 
@@ -41,7 +42,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { rates, footwear } = body;
+        const { rates, ratesHigh, footwear } = body;
 
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -58,6 +59,10 @@ export async function POST(req: Request) {
 
         if (rates) {
             updates.push(supabase.from('app_config').upsert({ key: 'rates_config', value: rates }, { onConflict: 'key' }));
+        }
+
+        if (ratesHigh) {
+            updates.push(supabase.from('app_config').upsert({ key: 'rates_high_config', value: ratesHigh }, { onConflict: 'key' }));
         }
 
         if (footwear) {

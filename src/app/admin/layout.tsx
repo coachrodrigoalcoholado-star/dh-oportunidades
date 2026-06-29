@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, Users, Settings, LogOut, FileText, Calculator, Menu, X, UserCog } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, FileText, Calculator, Menu, X, UserCog, MessageSquare, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,6 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const navItems = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, requiredRole: 'admin' },
+        { name: 'Listas Celulares', href: '/admin/whatsapp-converter', icon: Smartphone, requiredRole: 'admin' },
         { name: 'Clientes', href: '/admin/clients', icon: Users, requiredRole: 'admin' },
         { name: 'Usuarios', href: '/admin/users', icon: UserCog, requiredRole: 'admin' },
         { name: 'Configuración', href: '/admin/config', icon: Settings, requiredRole: 'admin' },

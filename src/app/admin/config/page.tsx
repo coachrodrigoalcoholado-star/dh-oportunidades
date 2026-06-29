@@ -16,6 +16,7 @@ interface FootwearConfig {
 
 export default function ConfigPage() {
     const [rates, setRates] = useState<RateConfig>({});
+    const [ratesHigh, setRatesHigh] = useState<RateConfig>({});
 
     // Footwear State
     const [footwearConfig, setFootwearConfig] = useState<FootwearConfig>({
@@ -26,9 +27,13 @@ export default function ConfigPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
-    // New Installment Logic
+    // New Installment Logic (Standard)
     const [newInstallment, setNewInstallment] = useState('');
     const [newRate, setNewRate] = useState('');
+
+    // New Installment Logic (High Loans > 1.5M)
+    const [newInstallmentHigh, setNewInstallmentHigh] = useState('');
+    const [newRateHigh, setNewRateHigh] = useState('');
 
     useEffect(() => {
         fetchConfig();
@@ -44,6 +49,13 @@ export default function ConfigPage() {
                 setRates(data.rates);
             } else {
                 setRates({ 4: 0.35, 6: 0.47, 8: 0.65, 10: 0.85 });
+            }
+
+            // Handle Rates High
+            if (data.ratesHigh) {
+                setRatesHigh(data.ratesHigh);
+            } else {
+                setRatesHigh({ 4: 0.20, 6: 0.30, 8: 0.40, 10: 0.70 });
             }
 
             // Handle Footwear
@@ -65,6 +77,7 @@ export default function ConfigPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     rates,
+                    ratesHigh,
                     footwear: footwearConfig
                 }),
             });
@@ -93,6 +106,24 @@ export default function ConfigPage() {
 
     const removeInstallment = (key: string) => {
         setRates(prev => {
+            const next = { ...prev };
+            delete next[parseInt(key)];
+            return next;
+        });
+    };
+
+    const addInstallmentHigh = () => {
+        const inst = parseInt(newInstallmentHigh);
+        const rate = parseFloat(newRateHigh);
+        if (inst && !isNaN(rate)) {
+            setRatesHigh(prev => ({ ...prev, [inst]: rate }));
+            setNewInstallmentHigh('');
+            setNewRateHigh('');
+        }
+    };
+
+    const removeInstallmentHigh = (key: string) => {
+        setRatesHigh(prev => {
             const next = { ...prev };
             delete next[parseInt(key)];
             return next;
@@ -187,12 +218,12 @@ export default function ConfigPage() {
                 </div>
             </section>
 
-            {/* LOAN RATES CONFIG */}
+            {/* LOAN RATES CONFIG (STANDARD) */}
             <section className="bg-dh-gray/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
                         <span className="w-1 h-6 bg-dh-gold rounded-full" />
-                        Tasas de Préstamos
+                        Tasas de Préstamos (Montos menores a $1.500.000)
                     </h3>
                 </div>
 
@@ -257,6 +288,84 @@ export default function ConfigPage() {
                                 onClick={addInstallment}
                                 disabled={!newInstallment || !newRate}
                                 className="text-dh-gold hover:text-white disabled:opacity-30 disabled:hover:text-dh-gold transition-colors"
+                            >
+                                <Plus className="w-6 h-6 ml-auto" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* LOAN RATES CONFIG (HIGH LOANS >= 1.5M) */}
+            <section className="bg-dh-gray/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <span className="w-1 h-6 bg-emerald-500 rounded-full" />
+                        Tasas de Préstamos (Montos superiores o iguales a $1.500.000)
+                    </h3>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4 mb-2 text-xs text-gray-500 uppercase tracking-wider font-bold px-4">
+                        <div>Cuotas</div>
+                        <div>Tasa (Coeficiente)</div>
+                        <div className="text-right">Acciones</div>
+                    </div>
+
+                    {Object.entries(ratesHigh).sort((a, b) => Number(a[0]) - Number(b[0])).map(([key, value]) => (
+                        <motion.div
+                            layout
+                            key={key}
+                            className="grid grid-cols-3 gap-4 items-center bg-black/20 p-4 rounded-xl border border-white/5"
+                        >
+                            <div className="font-mono text-xl text-white font-bold">{key} cuotas</div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={value}
+                                    onChange={(e) => setRatesHigh({ ...ratesHigh, [parseInt(key)]: parseFloat(e.target.value) })}
+                                    className="bg-transparent border-b border-gray-600 focus:border-emerald-500 text-emerald-400 font-mono text-lg w-20 outline-none text-center"
+                                />
+                                <span className="text-gray-600 text-xs">({(value * 100).toFixed(0)}%)</span>
+                            </div>
+                            <div className="text-right">
+                                <button
+                                    onClick={() => removeInstallmentHigh(key)}
+                                    className="text-red-400 hover:text-red-300 p-2 hover:bg-red-500/10 rounded-lg transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))}
+
+                    {/* ADD NEW */}
+                    <div className="grid grid-cols-3 gap-4 items-center bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/20 border-dashed mt-4">
+                        <div>
+                            <input
+                                type="number"
+                                placeholder="N° Cuotas"
+                                value={newInstallmentHigh}
+                                onChange={(e) => setNewInstallmentHigh(e.target.value)}
+                                className="bg-transparent border-b border-gray-600 focus:border-emerald-500 text-white w-full outline-none placeholder:text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <input
+                                type="number"
+                                step="0.01"
+                                placeholder="Tasa (ej: 0.30)"
+                                value={newRateHigh}
+                                onChange={(e) => setNewRateHigh(e.target.value)}
+                                className="bg-transparent border-b border-gray-600 focus:border-emerald-500 text-white w-full outline-none placeholder:text-gray-600"
+                            />
+                        </div>
+                        <div className="text-right">
+                            <button
+                                onClick={addInstallmentHigh}
+                                disabled={!newInstallmentHigh || !newRateHigh}
+                                className="text-emerald-400 hover:text-white disabled:opacity-30 disabled:hover:text-emerald-400 transition-colors"
                             >
                                 <Plus className="w-6 h-6 ml-auto" />
                             </button>
