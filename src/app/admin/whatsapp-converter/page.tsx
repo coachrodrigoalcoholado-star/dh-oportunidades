@@ -77,7 +77,7 @@ export default function WhatsAppConverter() {
             }
             
             if (currentIsIphoneBattery) {
-                const batteryMatch = line.match(/(\d{2})\s*%/);
+                const batteryMatch = line.match(/\b(\d{2,3})\s*%/);
                 if (batteryMatch) {
                     const battery = parseInt(batteryMatch[1], 10);
                     if (battery <= 79) {
