@@ -44,12 +44,19 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Ningún cliente de la lista contiene un DNI válido' }, { status: 400 });
         }
 
+        // Deduplicate clients by DNI (keeps the last occurrence for each DNI to avoid Postgres batch conflict)
+        const uniqueClientsMap = new Map<string, any>();
+        formattedClients.forEach((client: any) => {
+            uniqueClientsMap.set(client.dni, client);
+        });
+        const uniqueClients = Array.from(uniqueClientsMap.values());
+
         // Process in batches of 500
         const BATCH_SIZE = 500;
         let insertedCount = 0;
 
-        for (let i = 0; i < formattedClients.length; i += BATCH_SIZE) {
-            const batch = formattedClients.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < uniqueClients.length; i += BATCH_SIZE) {
+            const batch = uniqueClients.slice(i, i + BATCH_SIZE);
             const { error } = await supabase
                 .from('client_limits')
                 .upsert(batch, { onConflict: 'dni' });

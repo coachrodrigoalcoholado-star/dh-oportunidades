@@ -285,12 +285,19 @@ export default function ClientsPage() {
                     });
                 }
 
-                if (parsedClients.length === 0) {
+                // Deduplicate parsed clients by DNI (keeps the last entry for each DNI)
+                const clientsMap = new Map<string, ExcelClientPreview>();
+                for (const client of parsedClients) {
+                    clientsMap.set(client.dni, client);
+                }
+                const uniqueClientsList = Array.from(clientsMap.values());
+
+                if (uniqueClientsList.length === 0) {
                     alert("No se encontraron registros de clientes válidos en el archivo (se requiere una columna DNI).");
                     return;
                 }
 
-                setExcelPreview(parsedClients);
+                setExcelPreview(uniqueClientsList);
                 setShowExcelModal(true);
             } catch (err: any) {
                 console.error(err);
